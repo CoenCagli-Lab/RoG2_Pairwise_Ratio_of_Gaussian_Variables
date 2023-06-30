@@ -1,0 +1,13 @@
+*.asv
+*.sh
+dataPreperation/
+.*
+*.png
+*.pdf
+**/Calcium/**
+data/analysis
+data/raw
+!.gitignore
+replaceM.nu
+scripts/gofVsTrials.m
+data/simulations/*.mat
