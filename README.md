@@ -5,6 +5,7 @@ MATLAB Toolbox and code to reproduce the results in our paper, Modeling the Dive
 Run setup.m, which adds src/ to the MATLAB path for the current session. Then move to plots/ and try running makeFigureApproxVsTrue to produce Figure 1 in the paper. Functions in src/ have explanatory comments.
 
 # Folder Layout
+```
 .
 ├── data
 │   ├── processed
@@ -53,5 +54,5 @@ Run setup.m, which adds src/ to the MATLAB path for the current session. Then mo
     ├── surroundSuppression.m
     ├── varPowerLaw.m
     └── varRogTaylorApprox.m
-
+```
 [^1]:Modeling the Diverse Effects of Divisive Normalization on Noise Correlations. Oren Weiss, Hayley A. Bounds, Hillel Adesnik, Ruben Coen-Cagli. bioRxiv 2022.06.08.495145; doi: https://doi.org/10.1101/2022.06.08.495145
