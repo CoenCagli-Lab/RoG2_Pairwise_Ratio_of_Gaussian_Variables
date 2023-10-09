@@ -116,21 +116,30 @@ function [spikes,D,parameters] = generateRogCrf(num_trials,num_stims,parameters)
 %% Spike Generation
 %%
     spikes = zeros(2,num_stims,num_trials);
-    ND = zeros(4,num_stims,num_trials);
+    % ND = zeros(4,num_stims,num_trials);
+    chol_sigma_eta = cholcov(sigma_eta);
+    if isempty(chol_sigma_eta)
+        chol_sigma_eta = zeros(size(sigma_eta));
+    end
+    ND = repmat( [parameters.mu_n(1,:);parameters.mu_d(1,:); parameters.mu_n(2,:);parameters.mu_d(2,:)],1,1,num_trials);
     for k=1:num_stims
-            ND(:,k,:) = [parameters.mu_n(1,k); parameters.mu_d(1,k); parameters.mu_n(2,k);parameters.mu_d(2,k)].*ones(1,num_trials)...
-                            + internal_chol(squeeze(cov_ND(k,:,:))).'*randn(4,num_trials);
-
+            ND(:,k,:) = permute( ND(:,k,:),[1 3 2]) ...
+                            + cholcov(permute(cov_ND(k,:,:),[2 3 1])) * randn(4,num_trials);
+                            % + chol(squeeze(cov_ND(k,:,:))).'*randn(4,num_trials);
+                            % + internal_chol(squeeze(cov_ND(k,:,:))).'*randn(4,num_trials);
+% 
 
         ND(:,k,:) = reshape(...
-                    squeeze(ND(:,k,:)).*[ones(1,num_trials); (reshape(ND(2,k,:),1,[])>0); ones(1,num_trials); (reshape(ND(4,k,:),1,[])>0)],...
+                    permute(ND(:,k,:),[1 3 2]).*[ones(1,num_trials); (reshape(ND(2,k,:),1,[])>0); ones(1,num_trials); (reshape(ND(4,k,:),1,[])>0)],...
                     4,...
                     1,...
                     []);
         ND(ND==0) = NaN;
 
-        spikes(:,k,:) = [squeeze(ND(1,k,:)./ND(2,k,:)).'; squeeze(ND(3,k,:)./ND(4,k,:)).']...
-                            +mvnrnd(parameters.mu_eta,sigma_eta,num_trials).';
+        spikes(:,k,:) = permute([ND(1,k,:)./ND(2,k,:); ND(3,k,:)./ND(4,k,:)],[1 3 2])...
+                        + parameters.mu_eta + chol_sigma_eta * randn(2,num_trials);
+                                    % +mvnrnd(parameters.mu_eta,sigma_eta,num_trials).';
+
     end
     D = ND([2 4],:,:);
 
@@ -148,40 +157,40 @@ function [spikes,D,parameters] = generateRogCrf(num_trials,num_stims,parameters)
                         parameters.var_eta(:);...
                         parameters.rho_eta].';
 end
-function [U,isPosDef] = internal_chol(A)
-%CHOLPROJ  Projected Cholesky factorization.
-% cholproj(A) returns an upper triangular matrix U so that U'*U = A,
-% provided A is symmetric positive semidefinite (sps).
-%
-% If A is not sps, then U will approximately satisfy U'*U = A.   
-% This is useful when dealing with matrices that are affected
-% by roundoff errors.  By multiplying U'*U you effectively round A to the 
-% nearest sps matrix.
-%
-% [U,isPosDef] = cholproj(A) also returns whether A is positive definite.
-% % %
-% Taken from Lightspeed Toolbox (c) 2017 Tom Minka MIT License
-    [rowsA,colsA] = size(A);
-    U = zeros(rowsA,colsA);
-    isPosDef = 1;
-    for i = 1:colsA
-        for j = i:rowsA
-            k = 1:(i-1);
-            s = A(i,j) - U(k,i)'*U(k,j);
-            if i == j
-                if s <= 0
-                    isPosDef = 0;
-                    U(i,i) = 0;
-                else
-                    U(i,i) = sqrt(s);
-                end
-            else
-                if U(i,i) > 0
-                    U(i,j) = s / U(i,i);
-                else
-                    U(i,j) = 0;
-                end
-            end
-        end
-    end
-end
+% function [U,isPosDef] = internal_chol(A)
+% %CHOLPROJ  Projected Cholesky factorization.
+% % cholproj(A) returns an upper triangular matrix U so that U'*U = A,
+% % provided A is symmetric positive semidefinite (sps).
+% %
+% % If A is not sps, then U will approximately satisfy U'*U = A.   
+% % This is useful when dealing with matrices that are affected
+% % by roundoff errors.  By multiplying U'*U you effectively round A to the 
+% % nearest sps matrix.
+% %
+% % [U,isPosDef] = cholproj(A) also returns whether A is positive definite.
+% % % %
+% % Taken from Lightspeed Toolbox (c) 2017 Tom Minka MIT License
+%     [rowsA,colsA] = size(A);
+%     U = zeros(rowsA,colsA);
+%     isPosDef = 1;
+%     for i = 1:colsA
+%         for j = i:rowsA
+%             k = 1:(i-1);
+%             s = A(i,j) - U(k,i).'*U(k,j);
+%             if i == j
+%                 if s <= 0
+%                     isPosDef = 0;
+%                     U(i,i) = 0;
+%                 else
+%                     U(i,i) = sqrt(s);
+%                 end
+%             else
+%                 if U(i,i) > 0
+%                     U(i,j) = s / U(i,i);
+%                 else
+%                     U(i,j) = 0;
+%                 end
+%             end
+%         end
+%     end
+% end
