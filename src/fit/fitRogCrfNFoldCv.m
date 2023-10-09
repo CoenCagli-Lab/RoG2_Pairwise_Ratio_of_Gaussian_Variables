@@ -1,4 +1,4 @@
-function [nll_pair,nll_ind,pfit_pair,gof_pair,gof_ind,gof_diff] = fitRogCrfNFoldCv(nFold,spikes,cont,mu_eta,cov_eta,tuning)
+function [nll_pair,nll_ind,pfit_pair,gof_pair,gof_ind,gof_diff] = fitRogCrfNFoldCv(nFold,spikes,cont,mu_eta,cov_eta,tuning,opts)
 %% fitRogCrfNFoldCv N-fold Cross Validated Fit for the Ratio of Gaussians model using the contrast response function parametrization. Fits both the pairwise and independent models.
 %   INPUT
 %       nFold - number of folds to cross-validate over (set = number of trials to get LOOCV)
@@ -22,7 +22,7 @@ function [nll_pair,nll_ind,pfit_pair,gof_pair,gof_ind,gof_diff] = fitRogCrfNFold
         mu_eta (2,1);
         cov_eta (2,2);
         tuning function_handle = @contrastResponse;
-        opts struct = optimoptions(@fmincon,...
+        opts optim.options.Fmincon = optimoptions(@fmincon,...
             'Algorithm','sqp',...
             'MaxIter',1000,...
             'Display','off',...
@@ -55,7 +55,7 @@ function [nll_pair,nll_ind,pfit_pair,gof_pair,gof_ind,gof_diff] = fitRogCrfNFold
     nllpair_norm = NaN(nFold,1);
     nllind_norm = NaN(nFold,1);
 %% Can take the median across CV folds to get parameter estimates
-%   pfit = NaN(nFold,19);
+  pfit = NaN(nFold,19);
 
 
     for iFold=1:nFold
@@ -70,7 +70,7 @@ function [nll_pair,nll_ind,pfit_pair,gof_pair,gof_ind,gof_diff] = fitRogCrfNFold
         [MU_HAT_TRAIN,SIGMA_HAT_TRAIN] = mncovEmpirical(r_train);
         fun_temp = @(x)(rogNegLogLikeParam(x,MU_HAT_TRAIN,SIGMA_HAT_TRAIN,cont,mu_eta,tuning));
 
-        [pars_0,lb_pars,ub_pars] = rogOptimBounds(max(MU_HAT_TRAIN,2),var_eta);
+        [pars_0,lb_pars,ub_pars] = rogOptimBounds(max(MU_HAT_TRAIN,[],2),var_eta);
 %% ---------------------------------------------------------------------- % 
 % % these lines fix rho_eta, var_eta to be the empirically recorded values,
 % % and not parameters to be optimized. This makes a quantitative 
@@ -89,8 +89,8 @@ function [nll_pair,nll_ind,pfit_pair,gof_pair,gof_ind,gof_diff] = fitRogCrfNFold
 %% Optimize the parameters that are independent of correlation structrue (all besides rho parameters)
         x_ind = fmincon(fun_temp,pars_0,[],[],[],[],lb_pars,ub_pars,[],opts);
         % % Fix these parameters, change the range for the rho parameters
-        lb_pars([1:12 17:end]) = x_ind([1:12 17:end]);
-        ub_pars([1:12 17:end]) = x_ind([1:12 17:end]);
+        lb_pars([1:12 17:18]) = x_ind([1:12 17:18]);
+        ub_pars([1:12 17:18]) = x_ind([1:12 17:18]);
 %% ---------------------------------------------------------------------- % 
 % %  We only considered the case where rho_n1d2=rho_n2d1=0
 % %  Change these lines to look at the more general case
@@ -98,15 +98,15 @@ function [nll_pair,nll_ind,pfit_pair,gof_pair,gof_ind,gof_diff] = fitRogCrfNFold
 %        lb_pars(13:16) = [-1 -1 -1 -1];
 %        ub_pars(13:16) = [1 1 1 1]; 
 
-        lb_pars(13:16) = [-1 -1 0 0];
-        ub_pars(13:16) = [1 1 0 0];
+        lb_pars([13:16 19]) = [-1 -1 0 0 rho_eta]; 
+        ub_pars([13:16,19]) = [1 1 0 0 rho_eta]; 
+        x_ind(end) = rho_eta;
 %% ---------------------------------------------------------------------- % 
 % %  IMPORTANT - Currently set so that rho_eta == 0, as the data analyzed 
 % %  for this paper did not have this. You should change out these lines if 
 % %  you have recorded correlations in spontaneous activity.
 % ----------------------------------------------------------------------- %
 %%
-%         x_ind(end) = rho_eta;
 %         lb_pars(end) = -1;
 %         ub_pars(end) = 1; 
 %%        
@@ -117,7 +117,7 @@ function [nll_pair,nll_ind,pfit_pair,gof_pair,gof_ind,gof_diff] = fitRogCrfNFold
         [MU_PAIR,SIGMA_PAIR] = mncovRogCrf(x_pair,cont,mu_eta,tuning);
         [MU_IND,SIGMA_IND] = mncovRogCrf(x_ind,cont,mu_eta,tuning);
 
-        tmp = -log_bvnpdf(reshape(r_test,2,[]).',mean(r_train,[2 3],'omitnan').',diag(var(reshape(r_train,2,[]).','omitnan')));
+        tmp = -log_bvnpdf(reshape(r_test,2,[]).',mean(r_train,[2 3],'omitnan').',diag(var(reshape(r_train,2,[]),0,2,'omitnan')));
         tmp(isinf(tmp)) = NaN;
         nllnull = mean(tmp,'omitnan');
 %% ---------------------------------------------------------------------- % 
@@ -136,7 +136,7 @@ function [nll_pair,nll_ind,pfit_pair,gof_pair,gof_ind,gof_diff] = fitRogCrfNFold
         nllrog_pair(iFold) = nllpair;
         nllrog_ind(iFold) = nllind;
         nllind_norm(iFold) = (nllind-nllnull)./(nlloracle-nllnull);
-%       pfit(iFold,:) = x_pair;
+      % pfit(iFold,:) = x_pair;
 
     end
 %% Fit the model on all trials to get the parameter estimates
