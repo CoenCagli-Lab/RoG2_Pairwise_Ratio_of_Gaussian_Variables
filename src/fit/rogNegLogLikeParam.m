@@ -1,6 +1,5 @@
 function nll = rogNegLogLikeParam(pars,MU_HAT,SIGMA_HAT,contrasts,mu_eta,tuning) 
-%% NLL_GAUSS_PARAM Computes the negative log likelihood for the Ratio of Gaussians model
-% parametrized by contrast response function
+% NLL_GAUSS_PARAM Computes the negative log likelihood for the Ratio of Gaussians model parametrized by contrast response function
 %%
     arguments
         pars (1,19);

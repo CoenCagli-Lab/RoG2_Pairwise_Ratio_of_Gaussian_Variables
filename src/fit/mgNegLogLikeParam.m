@@ -1,4 +1,4 @@
-function nll = mgLogLikeParam(pars,MU_HAT,SIGMA_HAT,contrasts,mu_eta,tuning)
+function nll = mgNegLogLikeParam(pars,MU_HAT,SIGMA_HAT,contrasts,mu_eta,tuning)
 %% mgLogLikeParam Computes the parametrized negative Log-likelihood of a bivarate Gaussian model with Poisson-Gamma inspired moments.
 % This model is an adaptation of Goris (2014) to allow for full
 % specification of the joint distribution. Parametrized by the contrast

@@ -1,10 +1,17 @@
-function [x_pair] = fitRogCrf(spikes,cont,mu_eta,cov_eta,tuning)
+function [x_pair] = fitRogCrf(spikes,cont,mu_eta,cov_eta,tuning,opts)
     arguments
         spikes (2,:,:);
         cont (1,:);
         mu_eta (2,1);
         cov_eta (2,2);
         tuning function_handle = @contrastResponse;
+        opts optim.options.Fmincon = optimoptions(@fmincon,...
+                        'Algorithm','sqp',...
+                        'MaxIter',1000,...
+                        'Display','off',...
+                        'TolX',1e-6,...
+                        'TolFun',1e-6,...
+                        'TolCon',1e-3);
     end
 
     if size(spikes,2) ~= size(cont(:))
@@ -22,20 +29,12 @@ function [x_pair] = fitRogCrf(spikes,cont,mu_eta,cov_eta,tuning)
 %         error("Must input covariance matrix for noise")
 %     end
 
-    %% Set optimization parameters
-    opts = optimoptions(@fmincon,...
-                        'Algorithm','sqp',...
-                        'MaxIter',1000,...
-                        'Display','off',...
-                        'TolX',1e-6,...
-                        'TolFun',1e-6,...
-                        'TolCon',1e-3);
 
         %% Empirical (hat) and Null mean and covariance
-        [mu_hat,sigma_hat,corr_hat] = mncovEmpirical(spikes);
+        [mu_hat,sigma_hat,~] = mncovEmpirical(spikes);
         fun_temp = @(x)(rogNegLogLikeParam(x,mu_hat,sigma_hat,cont,mu_eta,tuning));
 
-        [pars_0,lb_pars,ub_pars] = rogOptimBounds(spikes,var_eta,rho_eta);
+        [pars_0,lb_pars,ub_pars] = rogOptimBounds(max(mu_hat,[],2),var_eta);
 %% ---------------------------------------------------------------------- % 
 % % these lines fix rho_eta, var_eta to be the empirically recorded values,
 % % and not parameters to be optimized. This makes a quantitative 
@@ -56,8 +55,8 @@ function [x_pair] = fitRogCrf(spikes,cont,mu_eta,cov_eta,tuning)
 %         [x_ind,~,~,~,~,~,hessInd] = fmincon(fun_temp,pars_0,[],[],[],[],lb_pars,ub_pars,[],opts);
 
         % % Fix these parameters, change the range for the rho parameters
-        lb_pars([1:12 17:end]) = x_ind([1:12 17:end]);
-        ub_pars([1:12 17:end]) = x_ind([1:12 17:end]);
+        lb_pars([1:12 17:18]) = x_ind([1:12 17:18]);
+        ub_pars([1:12 17:18]) = x_ind([1:12 17:18]);
 %% ---------------------------------------------------------------------- % 
 % %  We only considered the case where rho_n1d2=rho_n2d1=0
 % %  Change these lines to look at the more general case
@@ -65,8 +64,8 @@ function [x_pair] = fitRogCrf(spikes,cont,mu_eta,cov_eta,tuning)
 %        lb_pars(13:16) = [-1 -1 -1 -1];
 %        ub_pars(13:16) = [1 1 1 1]; 
 
-        lb_pars(13:16) = [-1 -1 0 0];
-        ub_pars(13:16) = [1 1 0 0];
+        lb_pars([13:16 19]) = [-1 -1 0 0 rho_eta]; % change rho_eta to -1
+        ub_pars([13:16,19]) = [1 1 0 0 rho_eta]; % change rho_eta to 1
 %% ---------------------------------------------------------------------- % 
 % %  IMPORTANT - Currently set so that rho_eta == 0, as the data analyzed 
 % %  for this paper did not have this. You should change out these lines if 
@@ -92,7 +91,7 @@ function [x_pair] = fitRogCrf(spikes,cont,mu_eta,cov_eta,tuning)
 %         hess = sqrt(diag(inv(hess)));
 %         hess([1:12 17:19]) = hess1D([1:12 17:19]);
 end
-function out = lsqNoiseCorr(params,contrasts,mu_eta,corrEmp,tuning)
-    [~,~,noiseCorrFit] = mncovRogCrf(params,contrasts,mu_eta,tuning);
-    out = sum((noiseCorrFit-corrEmp).^2,"all");
-end
+% function out = lsqNoiseCorr(params,contrasts,mu_eta,corrEmp,tuning)
+%     [~,~,noiseCorrFit] = mncovRogCrf(params,contrasts,mu_eta,tuning);
+%     out = sum((noiseCorrFit-corrEmp).^2,"all");
+% end

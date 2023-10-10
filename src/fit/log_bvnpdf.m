@@ -1,7 +1,6 @@
 function res = log_bvnpdf(X,MU,SIGMA)
-%% log_bvnpdf Log probability density for a bivariate Gaussian
-% NOTE: log(2*pi) is removed since we always look at this as a relative
-% value, so this constant factor gets subtracted off anyway
+% log_bvnpdf Log probability density for a bivariate Gaussian
+% NOTE: log(2*pi) is removed since we always look at this as a relative value, so this constant factor gets subtracted off anyway
 %%
     sig1 = SIGMA(1,1)^0.5;
     sig2 = SIGMA(2,2)^0.5;

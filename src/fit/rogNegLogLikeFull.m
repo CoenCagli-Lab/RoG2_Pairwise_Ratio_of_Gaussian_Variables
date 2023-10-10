@@ -1,8 +1,6 @@
 function nll = rogNegLogLikeFull(r,MU,SIGMA)
-%% rogNegLogLikeFull Negative Log Likelihood for the pairwise ratio of Gaussians model
-% NOTE: This is the full log likelihood, and not the approximation used for
-% function fitting. See rogNegLogLikeParam for that function. This is
-% computed directly using a bivariate normal pdf
+% rogNegLogLikeFull Negative Log Likelihood for the pairwise ratio of Gaussians model (or any Gaussian)
+% NOTE: This is the full log likelihood, and not the approximation used for function fitting. See rogNegLogLikeParam for that function. This is computed directly using a bivariate normal pdf
 %%
     [~,nS,nT] = size(r);
 
