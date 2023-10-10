@@ -1,15 +1,19 @@
 function [] = genDataNoiseCorrVsNormalization(nParallel, nEXP,nTrials,RhoSpace,Contrasts,mu_eta,sigma_eta,name)
-%% genDataNoiseCorrVsNormalization simulates data from Ratio of Gaussians to compare how normalization
-% effects noise correlations.
-% 	Keep RhoSpace small for visualization purposes
-%	OUTPUT File Contents
+% genDataNoiseCorrVsNormalization simulates data from Ratio of Gaussians to
+% compare how normalization effects noise correlations. Keep RhoSpace small for visualization purposes.
+%%  INPUT
+%       nParallel - number of cores ( must be > 1)
+%       nEXP - number of simulated pairs (default 1e5)
+%       nTrials - number of simulated trials (default 1e3)
+%       RhoSpace - Rho values for RhoN and RhoD (default -0.5,0,0.5)
+%       Contrasts contrast levels (1-100%) (default 6.25,12.5,25,50,100)
+%       mu_eta (2,1) - unused, setting the residual mean (default [0;0]
+%       sigma_eta (2,2) - unused, setting the residual noise covariance (default [0 0;0 0];)
+%       name - optional name appended to default name (default name YYYYMMDD_NoiseCorrVsNormalization)
+%%  OUTPUT File Contents
 %		genParams (struct) - returns the generating parameters for the function
-% 		epsNorm (nEXP,2,number of Rhos, number of Rhos) - product of epsilon parameters for
-% 															the paiwise ratio of gaussians.
-% 															Contrast independent measure of
-% 															normalization strength
-% 		allCorr (nEXP,number of contrasts, number of Rhos, number of Rhos) - all noise
-% 															correlations
+% 		epsNorm (nEXP,2,number of Rhos, number of Rhos) - product of epsilon parameters for the paiwise ratio of gaussians. Contrast independent measure of normalization strength
+% 		allCorr (nEXP,number of contrasts, number of Rhos, number of Rhos) - all noise correlations
 % Files are saved in data/simulations
 %%
 	arguments
@@ -38,7 +42,7 @@ function [] = genDataNoiseCorrVsNormalization(nParallel, nEXP,nTrials,RhoSpace,C
 
 	%% Setup File Names
 	Today = string(datetime('now','Format','yMMdd'));
-	saveprefix = sprintf('%s_DataFigureNoiseCorrVsNormalization',Today);
+	saveprefix = sprintf('%s_NoiseCorrVsNormalization',Today);
 	if ~isempty(name)
 		name = char(sprintf('%s_%s.mat',saveprefix,name));
 	else

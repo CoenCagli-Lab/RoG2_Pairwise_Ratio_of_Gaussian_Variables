@@ -1,15 +1,17 @@
 function [] = genDataApproxVsTrue(nParallel,nEXP,nTrials,name)
-%% genDataApproxVsTrue compares covariance/correlation from the Ratio of Gaussians distribution
-% 	OUTPUT File Contents
+% genDataApproxVsTrue compares covariance/correlation from the Ratio of Gaussians distribution
+%%  INPUT
+%       nParallel - number of cores (must be > 1)
+%       nEXP - number of simulated pairs (default 1e4)
+%       nTrials - number of simulated trials (default 1e6)
+%       name - name appended to end of default name (default name - YYYYMMDD_ApproxVsTrue
+%%  OUTPUT File Contents
 %		genParams (struct) - returns the generating parameters for the function
-% 		ratioCovariance (nEXP,1) - covariance between Ratio of Gaussians using full
-% 									distribution
-% 		ratioCorrelation (nEXP,1) - correlation between Ratio of Gaussians using full
-% 									distribution
-% 		taylorCovariance (nEXP,1) - covariance between Ratio of Gaussians using Taylor
-% 									Approximation
-% 		taylorCorrelation (nEXP,1) - correlation between Ratio of Gaussians using Taylor
-% 									Approximation
+% 		ratioCovariance (nEXP,1) - covariance between Ratio of Gaussians using full distribution
+% 		ratioCorrelation (nEXP,1) - correlation between Ratio of Gaussians using full distribution
+% 		taylorCovariance (nEXP,1) - covariance between Ratio of Gaussians using Taylor Approximation
+% 		taylorCorrelation (nEXP,1) - correlation between Ratio of Gaussians using Taylor Approximation
+%       genParams - convenience struct containing input parameters
 % File saved in data/simulations
 %%
 	arguments
@@ -39,7 +41,7 @@ function [] = genDataApproxVsTrue(nParallel,nEXP,nTrials,name)
 
 	%% Setup File Names
 	Today = string(datetime('now','Format','yMMdd'));
-	savename = sprintf('%s_DataFigureApproxVsTrue',Today);
+	savename = sprintf('%s_ApproxVsTrue',Today);
 	if ~isempty(name)
 		savename=[savename,'_',name];
 	end
@@ -82,7 +84,7 @@ function [] = genDataApproxVsTrue(nParallel,nEXP,nTrials,name)
 
 	t=toc;
 	fprintf('Total = %.2f minutes\n',t/60)
-	genParams = struct('nEXP',nEXP,'nTrials',nTrials); %#ok<*NASGU> 
+	genParams = struct('nEXP',nEXP,'nTrials',nTrials,'time',seconds(t)); %#ok<*NASGU> 
 	objSave  = {'ratioCovariance','ratioCorrelation','taylorCovariance','taylorCorrelation','genParams'};
 	save(['../data/simulations/',savename,'.mat'],objSave{:},'-v7.3')
 end
