@@ -8,7 +8,7 @@ function [] = genDataSingleTrialInference(nParallel,nEXP,nTrials,Contrasts,RhoN,
 %       nEXP - number of simulated pairs (default/max 11628)
 %       nTrials - number of synthetic trials (default 1e3)
 %       Contrasts - contrast levels used for synthesis (1-100%) (default 6.25, 12.5, 25, 50, 100)
-%       RhoN, RhoD - space of rho_N, rho_D values used to generate data (default RhoN = -0.5:0.1:0.5, RhoD = -0.5:0.1:0.5)
+%       RhoN, RhoD - space of rho_N, rho_D values used to generate data (default RhoN = -0.5:0.05:0.5, RhoD = -0.5:0.05:0.5)
 %       name - name appended to the default name (
 %%% NAME-VALUE INPUTS
 %       name - appended to the basename (which is YYYYMMDD_RhoFitVTrue)
@@ -31,8 +31,8 @@ arguments
     nEXP (1,1) {mustBeInteger,mustBePositive} = 0;
     nTrials (1,1) {mustBePositive,mustBeInteger}= 1e3;
     Contrasts (1,:) {mustBeLessThanOrEqual(Contrasts, 100)} = [6.25 12.5 25 50 100];
-    RhoN (1,:) {mustBeLessThan(RhoN,1),mustBeGreaterThan(RhoN,-1)} = -0.5:0.1:0.5;
-    RhoD (1,:) {mustBeLessThan(RhoD,1),mustBeGreaterThan(RhoD,-1)} = -0.5:0.1:0.5;
+    RhoN (1,:) {mustBeLessThan(RhoN,1),mustBeGreaterThan(RhoN,-1)} = -0.5:0.05:0.5;
+    RhoD (1,:) {mustBeLessThan(RhoD,1),mustBeGreaterThan(RhoD,-1)} = -0.5:0.05:0.5;
     p.name string = "";  %names will be appended at the end of filename
     p.seed (1,1) {mustBeInteger,mustBePositive} = 96309;
     p.tuning function_handle = @contrastResponse;
