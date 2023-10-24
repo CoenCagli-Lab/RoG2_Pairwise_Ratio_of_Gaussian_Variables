@@ -22,13 +22,13 @@ colormap(cmap);
 nRho = size(mseDIFF,2);
 tickLoc = 1:5:nRho;
 tickLabels = linspace(-0.5,0.5,numel(tickLoc));
-aData = ones(nRho); aData(floor(nRho/2),floor(nRho/2)) = 0; 
+% aData = ones(nRho); aData(floor(nRho/2),floor(nRho/2)) = 0; 
     %%
 for iFig = 1:3
     nexttile
     ax=gca();
     imageFig = squeeze(median(mseDIFF(:,:,:,3),1,'omitnan'));
-    I = imagesc(ax,imageFig,'AlphaData',aData);
+    I = imagesc(ax,imageFig);
     set(ax,'YDir','normal','XTick',tickLoc,'YTick',tickLoc,'XTickLabel',tickLabels,'YTickLabel',tickLabels,'XTickLabelRotation',45,'TickDir','out')
     axis square
     box off
@@ -47,7 +47,7 @@ for iFig = 1:3
     nexttile
     ax=gca();
     imageFig = squeeze(median(corrDIFF(:,:,:,3),1,'omitnan'));
-    I = imagesc(ax,imageFig,'AlphaData',aData);
+    I = imagesc(ax,imageFig);
     set(ax,'YDir','normal','XTick',tickLoc,'YTick',tickLoc,'XTickLabel',tickLabels,'YTickLabel',tickLabels,'XTickLabelRotation',45,'TickDir','out')
     axis square
     box off

@@ -5,11 +5,9 @@ dataPreperation/
 *.png
 *.pdf
 **/Calcium/**
-data/analysis
-data/raw
 !.gitignore
 !.gitattributes
 replaceM.nu
 scripts/gofVsTrials.m
-data/simulations/*.mat
 *.mat
+data/simulations/LargeFiles

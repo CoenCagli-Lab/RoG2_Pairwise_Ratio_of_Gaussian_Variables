@@ -8,7 +8,7 @@ rhoFit = fitParametersAll(:,13:14);
 rhoTrue = trueParameters(:,13:14);
 medCorr = abs(median(allCorr,2,'omitnan'));
 [nPairs,nBoots,~] = size(rhoBoot);
-rhoBootCI = prctile(rhoBoot,[2.5,97.5],2);
+rhoBootCI = prctile(rhoBoot,[5,95],2);
 rhoBootMean = squeeze(mean(rhoBoot,2,'omitnan')); % Mean of bootstrap sample
 
 %% Index Filtering
